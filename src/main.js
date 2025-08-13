@@ -3,6 +3,8 @@ import App from "./App.vue";
 import router from "./router";
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
+import { createPinia } from "pinia";
+import { useAppStore } from "./store";
 
 // 创建 Vue 实例
 let app = null;
@@ -35,6 +37,11 @@ const mount = () => {
       const { path } = to;
       console.log("[子应用] 接收到主应用路由通知:", path);
 
+      // 创建应用实例后才能获取store
+      const appStore = useAppStore();
+      // 设置标记，表示此次路由变化是由主应用触发的
+      appStore.setMainAppTriggered(true);
+
       // 只获取/subapp 后面的路径，包括在 /subapp 字符前面的也去掉
       let subAppPath = path.replace(/.*\/subapp/, "");
       console.log("[子应用] 转换后的路径:", subAppPath);
@@ -49,6 +56,8 @@ const mount = () => {
 
   // 创建应用实例
   app = createApp(App);
+  const pinia = createPinia();
+  app.use(pinia);
   app.use(router);
   app.use(ElementPlus);
   app.mount("#app");
